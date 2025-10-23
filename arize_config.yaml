@@ -18,7 +18,7 @@ processors:
   transform:
     error_mode: ignore
     trace_statements:
-      - set(resource.attributes["openinference.project.name"], "Span Remap Test 6 - Unfiltered")
+      - set(resource.attributes["openinference.project.name"], "Span Remap Test 7 - Unfiltered")
   filter_remap:
     # Maximum time to retain a trace before forwarding (default: 30s)
     max_trace_retention: 600s
@@ -68,10 +68,10 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  # otlp:
-  #   endpoint: "otlp.arize.com:443"
-  #   auth:
-  #     authenticator: headers_setter
+  otlp:
+    endpoint: "otlp.arize.com:443"
+    auth:
+      authenticator: headers_setter
   nop:
   prometheus:
     endpoint: "0.0.0.0:8889"

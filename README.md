@@ -486,11 +486,9 @@ service:
 
 ## License
 
-GNU Affero General Public License v3.0 (AGPL-3.0)
+Apache License 2.0 (Apache-2.0)
 
-This project is licensed under the AGPL-3.0, one of the strongest copyleft licenses. This means:
-- Any modifications or derivative works must also be licensed under AGPL-3.0
-- If you run this software as a service over a network, you must make the source code available to users
-- Patent licenses are granted to all users
+This project is licensed under the Apache License, Version 2.0.
 
-See the [LICENSE](LICENSE) file for full details.
+- See the [LICENSE](LICENSE) file for the full text.
+- See the [NOTICE](NOTICE) file for attribution and third‑party notices.

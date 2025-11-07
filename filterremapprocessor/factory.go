@@ -35,7 +35,7 @@ func createDefaultConfig() component.Config {
 		FlushOnShutdown:              false,
 		ForwardQueueSize:             0,
 		ForwardWorkerConcurrency:     0,
-		OverflowStrategy:             OverflowForward,
+		OverflowStrategy:             OverflowDrop,
 	}
 }
 

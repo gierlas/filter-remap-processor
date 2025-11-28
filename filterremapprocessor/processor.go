@@ -119,8 +119,11 @@ func newFilterRemapProcessor(ctx context.Context, set processor.Settings, nextCo
 
 func (frp *filterRemapProcessor) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
 	resourceSpans := td.ResourceSpans()
+	// Create a context that preserves values (like metadata) but won't be cancelled when the request completes
+	// This is necessary because traces may be forwarded asynchronously after the request context is done
+	detachedCtx := context.WithoutCancel(ctx)
 	for i := 0; i < resourceSpans.Len(); i++ {
-		frp.processTraces(resourceSpans.At(i))
+		frp.processTraces(detachedCtx, resourceSpans.At(i))
 	}
 	return nil
 }
@@ -185,7 +188,7 @@ func (frp *filterRemapProcessor) filterSpansByTraceId(resourceSpans ptrace.Resou
 	return traceIdToSpans, errors
 }
 
-func (frp *filterRemapProcessor) processTraces(resourceSpans ptrace.ResourceSpans) {
+func (frp *filterRemapProcessor) processTraces(ctx context.Context, resourceSpans ptrace.ResourceSpans) {
 	currTime := time.Now()
 
 	// Group spans per their traceId to minimize contention on traceIdToTrace
@@ -208,6 +211,7 @@ func (frp *filterRemapProcessor) processTraces(resourceSpans ptrace.ResourceSpan
 					m: make(map[pcommon.SpanID]hierarchyNode),
 				},
 				SpanCount: atomic.Int64{},
+				Ctx:       ctx, // Store the detached context to preserve metadata
 			}
 
 			td.SpanCount.Store(lenSpans)
@@ -379,7 +383,9 @@ func (frp *filterRemapProcessor) forwardTrace(trace *traceData) {
 	startTime := time.Now()
 	remappedTrace := buildRemappedTrace(allSpansRetained)
 	frp.telemetry.ProcessorFilterRemapTraceRemapLatency.Record(frp.ctx, time.Since(startTime).Microseconds())
-	frp.nextConsumer.ConsumeTraces(frp.ctx, remappedTrace)
+	// Use the stored context from the trace to preserve request metadata (like headers)
+	// while still being safe for async operations (context was detached from request cancellation)
+	frp.nextConsumer.ConsumeTraces(trace.Ctx, remappedTrace)
 	frp.telemetry.ProcessorFilterRemapForwardTraceLatency.Record(frp.ctx, time.Since(currTime).Milliseconds())
 }
 

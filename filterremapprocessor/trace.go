@@ -1,6 +1,7 @@
 package filterremapprocessor
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -13,6 +14,7 @@ type traceData struct {
 	LastSpanArrivalNanos atomic.Int64
 	HierarchyMap         hierarchyMap
 	SpanCount            atomic.Int64
+	Ctx                  context.Context // Store the incoming request context to preserve metadata
 }
 
 type hierarchyMap struct {
